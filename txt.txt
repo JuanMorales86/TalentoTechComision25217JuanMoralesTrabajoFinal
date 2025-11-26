@@ -1,0 +1,11 @@
+proyecto
+
+Gestor de Colecciones (Cómics, Videojuegos, Películas):
+
+Descripción: Una herramienta para catalogar una colección personal.
+Funcionalidades CRUD:
+Crear: Añadir un nuevo ítem a tu colección (ej: un videojuego con su título, plataforma, año de lanzamiento, y si lo has completado o no).
+Leer: Listar toda tu colección, filtrar por plataforma (ej: "todos los juegos de Switch"), o buscar un ítem específico.
+Actualizar: Cambiar el estado de un ítem (ej: marcar una película como "vista" o un libro como "leído").
+Eliminar: Quitar un ítem de tu colección.
+El Toque Original: Podrías añadir un campo de "valoración" (de 1 a 5 estrellas) y luego crear una función que te muestre tu "Top 5" de ítems mejor valorados. También podrías tener una lista de "deseados" en una tabla separada.
