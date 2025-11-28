@@ -14,7 +14,7 @@ def operacion_read_articles():
 
             for id_art, id_col, codigo_art, nomb_art, descr_art, ano_lanz, visto_art, val_art in articulos_leidas:
                 visto_lanza = 'Si' if visto_art else 'No'
-                print_personalized(f'\nID: \t {id_art}, \nID Coleccion: \t {id_col}, \nCodigo Articulo: \t {codigo_art}, \nNombre: \t {nomb_art}, \nDescripcion: \t {descr_art}, \nAño Lanzamiento: \t {ano_lanz}, \nYa Visto?: \t {visto_lanza}, \nValoracion: \t {val_art}.', "info")
+                print_personalized(f'\nID del articulo: \t {id_art}, \nID de la Coleccion Padre: \t {id_col}, \nCodigo perzonalizado del Articulo: \t {codigo_art}, \nNombre: \t {nomb_art}, \nDescripcion: \t {descr_art}, \nAño Lanzamiento: \t {ano_lanz}, \nYa Visto?: \t {visto_lanza}, \nValoracion: \t {val_art}.', "info")
                 print_personalized("---------------------------------------", "info")
 
     except volver_al_menu:

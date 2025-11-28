@@ -14,9 +14,9 @@ def delete_art_collection():
                     
                     print_personalized('Escriba "menu o m" en cualquier momento para volver al menú principal.', "info")
                     print_personalized('\nBusque una colección por su tipo, o por el nombre/código de un artículo.', "info")
-                    input_busqueda = verificador_de_inputs('Buscar (o escriba "volver" para regresar): ', str.lower, 'Debe ingresar un término de búsqueda válido.', lambda x: bool(x))
+                    input_busqueda = verificador_de_inputs('Buscar: ', str.lower, 'Debe ingresar un término de búsqueda válido.', lambda x: bool(x))
 
-                    if input_busqueda == 'volver':
+                    if input_busqueda == 'menu' or input_busqueda == 'm':
                         return
 
                     termino_de_busqueda = f'%{input_busqueda}%'
@@ -53,6 +53,7 @@ def delete_art_collection():
                         mapa_art[id_art] = nombre_art
                         print_personalized(f'  [ID: {id_art}] - Nombre: {nombre_art} - Código: {codigo_art}', "info")
                     print_personalized("----------------------------------\n", "info")
+
                     id_articulo_selecc = verificador_de_inputs('Ingrese el ID del articulo a eliminar: ', int, 'Debe ingresar un ID de la lista.', lambda x: x is not None and x in mapa_art)
 
                     if not id_articulo_selecc:
@@ -87,38 +88,38 @@ def delete_collection():
 
             with get_db_conection() as conexion:
                 cursor = conexion.cursor()
-            cursor.execute('SELECT id_coleccion, nombre_coleccion, tipo_coleccion FROM colecciones WHERE nombre_coleccion LIKE ? OR id_coleccion LIKE ? OR tipo_coleccion LIKE ?', (termino_de_busqueda, termino_de_busqueda, termino_de_busqueda))
+                cursor.execute('SELECT id_coleccion, nombre_coleccion, tipo_coleccion FROM colecciones WHERE nombre_coleccion LIKE ? OR id_coleccion LIKE ? OR tipo_coleccion LIKE ?', (termino_de_busqueda, termino_de_busqueda, termino_de_busqueda))
 
-            colecciones_encontradas = cursor.fetchall()
+                colecciones_encontradas = cursor.fetchall()
 
-            if not colecciones_encontradas:
-                raise error_de_operacion(f'No se encontraron colecciones para el término "{input_busqueda}".')
-            
-            print_personalized("\n--- Colecciones Encontradas ---", "info")
-            mapa_colec = {}
-            for id_col, nombre_col, tipo_col in colecciones_encontradas:
-                mapa_colec[id_col] = nombre_col
-                print_personalized(f'  [ID: {id_col}] - Nombre: {nombre_col} - Tipo: {tipo_col}', "info")
-            print_personalized("----------------------------------\n", "info")
+                if not colecciones_encontradas:
+                    raise error_de_operacion(f'No se encontraron colecciones para el término "{input_busqueda}".')
+                
+                print_personalized("\n--- Colecciones Encontradas ---", "info")
+                mapa_colec = {}
+                for id_col, nombre_col, tipo_col in colecciones_encontradas:
+                    mapa_colec[id_col] = nombre_col
+                    print_personalized(f'  [ID: {id_col}] - Nombre: {nombre_col} - Tipo: {tipo_col}', "info")
+                print_personalized("----------------------------------\n", "info")
 
-            id_coleccion_eliminar = verificador_de_inputs('Ingrese el ID de la coleccion a eliminar: ', int, 'Debe ingresar un ID de la lista.', lambda x: x is not None and x in mapa_colec)
+                id_coleccion_eliminar = verificador_de_inputs('Ingrese el ID de la coleccion a eliminar: ', int, 'Debe ingresar un ID de la lista.', lambda x: x is not None and x in mapa_colec)
 
 
-            if not id_coleccion_eliminar:
-                raise error_de_operacion('Colección no encontrada.')
-            
-            print_personalized('Advertencia: Al eliminar una colección, se eliminarán todos los artículos asociados a ella debido a que estan enlazados', "info")
+                if not id_coleccion_eliminar:
+                    raise error_de_operacion('Colección no encontrada.')
+                
+                print_personalized('Advertencia: Al eliminar una colección, se eliminarán todos los artículos asociados a ella debido a que estan enlazados', "info")
 
-            print_personalized('Desea continuar con la eliminación de la colección y sus artículos asociados?', "info")
-            confirmar = verificador_de_inputs('Escriba "si" para confirmar o "no" para cancelar: ', str.lower, 'Respuesta no válida.', lambda x: x in ['si', 'no'])
+                print_personalized('Desea continuar con la eliminación de la colección y sus artículos asociados?', "info")
+                confirmar = verificador_de_inputs('Escriba "si" para confirmar o "no" para cancelar: ', str.lower, 'Respuesta no válida.', lambda x: x in ['si', 'no'])
 
-            if confirmar != 'si':
-                print_personalized('Eliminación cancelada.', "info")
-                return
-            
-            cursor.execute('DELETE FROM colecciones WHERE id_coleccion = ?', (id_coleccion_eliminar,))
+                if confirmar != 'si':
+                    print_personalized('Eliminación cancelada.', "info")
+                    return
+                
+                cursor.execute('DELETE FROM colecciones WHERE id_coleccion = ?', (id_coleccion_eliminar,))
 
-            print_personalized(f'La colección "{mapa_colec[id_coleccion_eliminar]}" (ID: {id_coleccion_eliminar}) ha sido eliminada correctamente.', "info")
+                print_personalized(f'La colección "{mapa_colec[id_coleccion_eliminar]}" (ID: {id_coleccion_eliminar}) ha sido eliminada correctamente.', "info")
 
     except volver_al_menu:
         print_personalized("\nOperación cancelada. Volviendo al menú principal.", "info")

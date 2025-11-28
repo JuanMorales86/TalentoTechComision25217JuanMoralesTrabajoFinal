@@ -51,7 +51,7 @@ def update_art_collection():
                 mapa_articulos[id_articulo] = nombre_art
                 print_personalized(f'ID: {id_articulo} - Codigo: {codigo_art} - Nombre: {nombre_art}', "info")
 
-            id_articulo_actualizar = verificador_de_inputs('Ingrese el ID del articulo a actualizar', int, 'Debe ingresar un ID de articulo valido.', lambda x: x in mapa_articulos)
+            id_articulo_actualizar = verificador_de_inputs('Ingrese el ID del articulo a actualizar: ', int, 'Debe ingresar un ID de articulo valido.', lambda x: x in mapa_articulos)
 
             if not id_articulo_actualizar:
                 raise error_de_operacion('No hay articulos con ese ID')
@@ -83,7 +83,7 @@ def update_art_collection():
 
             cursor.execute('UPDATE articulos SET nombre_art = ?, descripcion_art = ?, ano_lanzamiento_art = ?, visto_art = ?, valoracion_art = ? WHERE id_articulo = ?', parametros)
 
-            print_personalized(f'El articulo "{nombre_actual}" ha sido actualizado a "{input_nombre_actualizar}".', "info")
+            print_personalized(f'El articulo "{nombre_actual}" ha sido actualizado a "{input_nombre_actualizar or nombre_actual}".', "info")
 
     except volver_al_menu:
         print_personalized("Operación cancelada. Volviendo al menú principal.", "info")
@@ -100,7 +100,16 @@ def update_collection():
         with get_db_conection() as conexion:
             cursor = conexion.cursor()
 
-            operacion_read_collection_types()
+            cursor.execute('SELECT id_coleccion, nombre_coleccion FROM colecciones')
+            colecciones_disponibles = cursor.fetchall()
+
+            if not colecciones_disponibles:
+                raise error_de_operacion('No hay colecciones disponibles para actualizar.')
+            
+            print_for_titles('Colecciones disponibles:', 'subtitle', 50)
+            for id_coleccion, nombre_coleccion in colecciones_disponibles:
+                print_personalized(f'Codigo_Coleccion: {id_coleccion} - Nombre: {nombre_coleccion}', "info")
+
             
             id_coleccion_actualizar = verificador_de_inputs('Ingrese el ID de la coleccion en cuestion: ', int, 'Debe ingresar un ID valido. ', lambda x: bool(x))
 
@@ -108,21 +117,25 @@ def update_collection():
 
             coleccion_actual = cursor.fetchone()
 
-            ( nombre_coleccion_acual) = coleccion_actual
-
-            if not id_coleccion_actualizar:
+            if not coleccion_actual:
                 raise error_de_operacion('Coleccion no encontrada.')
             
+            id_coleccion_actual, nombre_coleccion_actual = coleccion_actual
 
-            input_nombre_coleccion = verificador_de_inputs('Nuevo nombre de la coleccion: ', str.capitalize, '', lambda x: True)
+            print_personalized(f'Coleccion actual: {nombre_coleccion_actual}', "info")
+            print_personalized('----------------------------------------------------', "info")
+            print_personalized('Ingrese los nuevos datos de la coleccion.', "info")
+            print_personalized('Deje el campo en blanco si no desea actualizar.', "info")
 
-            parametros = (
-                input_nombre_coleccion or nombre_coleccion_acual, id_coleccion_actualizar
-            )
+            input_nombre_coleccion = verificador_de_inputs('Nuevo nombre de la coleccion: ', str.upper, '', lambda x: True)
 
-            cursor.execute('UPDATE colecciones SET nombre_coleccion = ? WHERE id_coleccion = ?', (parametros))
 
-            print_personalized(f'La coleccion "{nombre_coleccion_acual}" ha sido actualizada a "{input_nombre_coleccion}".', "info")
+            parametros = (input_nombre_coleccion or nombre_coleccion_actual, id_coleccion_actualizar)
+
+            cursor.execute('UPDATE colecciones SET nombre_coleccion = ? WHERE id_coleccion = ?', parametros)
+
+            print_personalized(f'La coleccion "{nombre_coleccion_actual}" ha sido actualizada a "{input_nombre_coleccion or nombre_coleccion_actual}".', "info")
+
 
     except volver_al_menu:
         print_personalized("Operación cancelada. Volviendo al menú principal.", "info")
@@ -133,6 +146,65 @@ def update_collection():
     except Exception as e:
         print_personalized(f'Error al actualizar la coleccion: {e}', "error")
 
+def update_types_collection():
+    try:
+        print_personalized('Escriba "menu o m" en cualquier momento para volver al menú principal.', "info")
+        with get_db_conection() as conexion:
+            cursor = conexion.cursor()
+
+            input_busca_usuario = verificador_de_inputs('Ingrese el nombre de el tipo de coleccion que quiere modificar: ', str, '', lambda x: True)
+
+            busqueda_real = input_busca_usuario if input_busca_usuario is not None else ''
+
+            termino_verificado = f'%{busqueda_real}%'
+
+            cursor.execute('SELECT id_tipo, nombre_tipo FROM tiposdecolecciones WHERE nombre_tipo LIKE ?', (termino_verificado,))
+
+            res_tipo = cursor.fetchall()
+
+            if not res_tipo:
+                raise error_de_operacion(f'No hay tipos de colecciones con ese: {input_busca_usuario}')
+
+            mapa_tipo = {}
+            for id_tipos , nombre_tipos in res_tipo:
+                mapa_tipo[id_tipos] = nombre_tipos
+                print_personalized(f'\n ID de Tipos: {id_tipos} -- Nombre de los Tipos: {nombre_tipos}', "info")
+            
+
+            id_seleccionado_tipo = verificador_de_inputs('Ingrese el id del tipo de coleccion a modificar: ', int, 'Debe ingresar un id valido', lambda x: x in mapa_tipo)
+
+            
+            cursor.execute('SELECT id_tipo, nombre_tipo FROM tiposdecolecciones WHERE id_tipo = ?', (id_seleccionado_tipo,))
+
+            res_id_tipo = cursor.fetchone()
+            
+            if not res_id_tipo:
+                raise error_de_operacion('No existe ese id con en el tipo de coleccion')
+            
+            id_tipo_actual, nombre_tipo_actual = res_id_tipo
+
+            input_actualizar_tipo = verificador_de_inputs('Ingresar la actualizacion del nombre tipo: ', str.upper, '', lambda x: True)
+
+            parametros = (
+                input_actualizar_tipo or nombre_tipo_actual, id_seleccionado_tipo
+            )
+
+            cursor.execute('UPDATE tiposdecolecciones SET nombre_tipo = ? WHERE id_tipo = ?', parametros)
+
+            print_personalized(f'El tipo de colección "{nombre_tipo_actual}" ha sido actualizado a "{input_actualizar_tipo or nombre_tipo_actual}".', "info")
+    
+    except volver_al_menu:
+        print_personalized("Operación cancelada. Volviendo al menú principal.", "info")
+
+
+    except error_de_operacion as e:
+        print_personalized(f'Error {e}', "error")
+
+    except ValueError as e:
+        print_personalized(f'Error al actualizar en el sistema.{e}', "error" )
+        return
+
 if __name__ == '__main__':
     update_art_collection()
     update_collection()
+    update_types_collection()

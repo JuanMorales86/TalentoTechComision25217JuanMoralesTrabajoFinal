@@ -16,7 +16,7 @@ def create_art_in_collections():
 
             input_tipo_coleccion = verificador_de_inputs('Busque una colección por tipo (o deje en blanco para ver todas): ', str.lower, '', lambda x: True)
 
-            busqueda_real = input_tipo_coleccion if input_tipo_coleccion is not None else ""  # si el usuario deja el input en blanco, convertimos a una cadena vacia por que si no devuelve None como termino y cae en el if not q esta ams abajo
+            busqueda_real = input_tipo_coleccion if input_tipo_coleccion is not None else ""  # si se da q el usuario deja el input en blanco, convertimos a una cadena vacia por que si no devuelve None como termino y cae en el if not q esta ams abajo
 
             termino_busqueda = f'%{busqueda_real}%'
 
@@ -29,7 +29,7 @@ def create_art_in_collections():
 
             print('\n--- Colecciones Disponibles ---')
 
-            # validar mejor la seleccion del ussuario agrupandolo en un diccionario id - nombre
+            # valido mejor la seleccion del ussuario agrupandolo en un diccionario id - nombre
             mapa_colecciones = {}
             for id_coleccion, nombre_coleccion, tipo_coleccion in colecciones_disponibles:
                 mapa_colecciones[id_coleccion] = nombre_coleccion
@@ -86,10 +86,9 @@ def create_art_in_collections():
 def create_colections():
     try:
         print_personalized('Escriba "menu o m" en cualquier momento para volver al menú principal.', "info")
-        input_nombre_col = verificador_de_inputs('Ingrese el nombre de la colección nueva: ', str, 'Debe ingresar un nombre válido.', lambda x: bool(x))
-
+        
         tipos_disponibles = operacion_read_collection_types(imprimir=False)
-
+        
         if not tipos_disponibles:
             raise error_de_operacion('No hay tipos de colecciones disponibles. Por favor, cree un tipo de colección antes de crear una colección.')
 
@@ -97,6 +96,9 @@ def create_colections():
         for i, tipo in enumerate(tipos_disponibles, 1):
             print_personalized(f'  {i}. {tipo}', "info")
         print("-------------------------------------\n")
+        
+        input_nombre_col = verificador_de_inputs('Ingrese el nombre de la colección nueva: ', str.upper, 'Debe ingresar un nombre válido.', lambda x: bool(x))
+
 
         opcion_tipo_num = verificador_de_inputs('Ingrese el número del tipo de colección: ', int, 'Debe ingresar un número de la lista.', lambda x: 1 <= x <= len(tipos_disponibles))
 
@@ -126,20 +128,20 @@ def create_colections():
 def create_types_collections():
     try:
         print_personalized('Escriba "menu o m" en cualquier momento para volver al menú principal.', "info")
-        operacion_read_collection_types(imprimir=True)
-
-        tipos_disponibles = operacion_read_collection_types(imprimir=False)
-
-        input_nombre_tipo_coleccion = verificador_de_inputs('Ingresar un nombre descriptivo para un tipo de coleccion nueva: ', str.upper, 'Debe ingresar un nombre valido', lambda  x: bool(x))
-
-        #es un for simplificado para convertir mayusculas o minusculas en la tabla y evitar duplicados
-        tipos_disponibles_upper = [tipo.upper() for tipo in tipos_disponibles]
-
-        if input_nombre_tipo_coleccion in tipos_disponibles_upper:
-            raise error_de_operacion(f'El tipo de coleccion "{input_nombre_tipo_coleccion}" ya existe en la base de datos')
         
         with get_db_conection() as conexion:
             cursor = conexion.cursor()
+
+            # Leemos los tipos existentes una sola vez
+            cursor.execute('SELECT nombre_tipo FROM tiposdecolecciones')
+            tipos_disponibles = [row[0] for row in cursor.fetchall()]
+
+            input_nombre_tipo_coleccion = verificador_de_inputs('Ingresar un nombre descriptivo para un tipo de coleccion nueva: ', str.upper, 'Debe ingresar un nombre valido', lambda  x: bool(x))
+
+            # Comprobamos si el tipo ya existe (insensible a mayúsculas/minúsculas)
+            if input_nombre_tipo_coleccion.upper() in [tipo.upper() for tipo in tipos_disponibles]:
+                raise error_de_operacion(f'El tipo de coleccion "{input_nombre_tipo_coleccion}" ya existe en la base de datos')
+            
             cursor.execute('INSERT INTO tiposdecolecciones(nombre_tipo) VALUES(?)', (input_nombre_tipo_coleccion,))
 
         print_personalized(f'Tipo agregado exitosamente {input_nombre_tipo_coleccion}, a la base de datos ', "success")

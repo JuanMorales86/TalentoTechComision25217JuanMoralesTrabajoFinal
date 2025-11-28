@@ -1,4 +1,4 @@
-from .print_estilo import print_personalized, print_for_titles
+from .print_estilo import print_personalized
 from .excepciones import volver_al_menu
 
 
@@ -13,12 +13,12 @@ def verificador_de_inputs(prompt, input_type=str, error_message="Entrada no vali
         if user_input.lower() == 'menu' or user_input.lower() == 'm':
             raise volver_al_menu()
         
-        # Si la entrada está vacía
+        # Si la entrada esta vacia
         if not user_input:
             # Si la función de validación existe y acepta None, devolvemos None sin error.
             if validation_function and validation_function(None):
                 return None
-            # Si es un string, una cadena vacía es válida.
+            # Si es un string, una cadena vacia es valida.
             if input_type == str and (validation_function is None or validation_function("")):
                 return ""
 

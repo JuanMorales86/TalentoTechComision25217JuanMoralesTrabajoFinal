@@ -10,9 +10,9 @@ def print_personalized(message, type = "info"):
         case "info":
             print(Fore.LIGHTBLUE_EX + Back.WHITE + Style.BRIGHT + message)
         case "success":
-            print(Fore.GREEN + Back.WHITE + Style.BRIGHT + message)
+            print(Fore.WHITE + Back.GREEN + Style.BRIGHT + message)
         case "warning":
-            print(Fore.YELLOW + Back.RED + Style.BRIGHT + message)
+            print(Fore.BLACK + Back.YELLOW + Style.BRIGHT + message)
         case "error":
             print(Fore.WHITE + Back.RED + Style.BRIGHT + message)
         case "title":
